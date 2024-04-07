@@ -1,0 +1,38 @@
+import machine
+import time
+
+# Definir los pines del joystick
+joystick_x_pin = 34
+joystick_y_pin = 35
+
+# Definir el pin del servo
+servo_pin = 14
+servo_pwm = machine.PWM(machine.Pin(servo_pin), freq=50)
+
+# Función para leer la posición del joystick
+def read_joystick():
+    x_value = machine.ADC(machine.Pin(joystick_x_pin))
+    y_value = machine.ADC(machine.Pin(joystick_y_pin))
+    x_position = x_value.read_u16()
+    y_position = y_value.read_u16()
+    return x_position, y_position
+
+# Función para mover el servo a una posición específica
+def move_servo(angle):
+    duty = int(40 + (angle / 180) * 115)  # Convertir el ángulo a valor de duty cycle (rango: 40-155)
+    servo_pwm.duty(duty)
+
+# Bucle principal
+while True:
+    x_pos, _ = read_joystick()
+    # Calcular el valor medio del rango del joystick
+    mid_value = 32768  # Valor medio de un ADC de 16 bits
+    if x_pos < mid_value - 10000:  # Si el joystick se mueve a la izquierda
+        print("Izquierda")
+        move_servo(0)  # Mover el servo a la posición izquierda
+ # Mover el servo a la posición derecha
+    else:
+        print("Centro")
+        move_servo(90)  # Mover el servo a la posición central
+    time.sleep(0.1)  # Pequeña pausa para suavizar el movimiento
+

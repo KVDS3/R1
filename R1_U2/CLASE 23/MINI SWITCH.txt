@@ -1,0 +1,27 @@
+import ssd1306
+from machine import Pin, I2C
+import time
+
+# Configuración del sensor mini switch
+switch = Pin(32, Pin.IN, Pin.PULL_UP)  # Asigna el pin donde está conectado el sensor mini switch
+
+# Configuración del display OLED
+i2c = I2C(scl=Pin(5), sda=Pin(4))  # Asigna los pines SCL y SDA para la comunicación I2C
+oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+
+# Textos a mostrar en el display
+texts = ["Nombre:Kevin", "Edad:19", "Telefono:4181151659","Dirreccion:La venta", "Grupo:GDS0552"]
+current_text_index = 0
+
+while True:
+    if not switch.value():  # Si el sensor mini switch está activado
+        current_text_index = (current_text_index + 1) % len(texts)  # Cambia al siguiente mensaje
+        oled.fill(0)  # Limpia la pantalla
+        oled.text(texts[current_text_index], 0, 0)  # Imprime el mensaje actual en el display OLED
+        oled.show()  # Actualiza la pantalla con el mensaje
+        time.sleep(0.5)  # Espera un tiempo para evitar rebotes del sensor mini switch
+    else:
+        oled.fill(0)  # Limpia la pantalla cuando el sensor mini switch no está activado
+        oled.show()  # Actualiza la pantalla para borrar cualquier mensaje anterior
+    time.sleep(0.1)  # Espera un corto período antes de volver a leer el estado del sensor mini switch
+

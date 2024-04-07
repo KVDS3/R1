@@ -1,0 +1,31 @@
+import machine
+import time
+
+# Definir el pin del sensor tilt switch
+tilt_switch_pin = 34
+tilt_switch = machine.Pin(tilt_switch_pin, machine.Pin.IN)
+
+# Definir el pin del servo
+servo_pin = 14
+servo_pwm = machine.PWM(machine.Pin(servo_pin), freq=50)
+
+# Función para leer el estado del sensor tilt switch
+def read_tilt_switch():
+    return tilt_switch.value()
+
+# Función para mover el servo a una posición específica
+def move_servo(angle):
+    duty = int(40 + (angle / 180) * 115)  # Convertir el ángulo a valor de duty cycle (rango: 40-155)
+    servo_pwm.duty(duty)
+
+# Bucle principal
+while True:
+    tilt_state = read_tilt_switch()
+    if tilt_state == 1:  # Si el tilt switch detecta inclinación hacia la izquierda
+        print("Inclinación: SE MUEVE EL SERVO")
+        move_servo(0)  # Mover el servo a la posición izquierda
+    else:
+        print("Posición normal")
+        move_servo(90)  # Mover el servo a la posición central
+    time.sleep(0.1)  # Pequeña pausa para suavizar el movimiento
+

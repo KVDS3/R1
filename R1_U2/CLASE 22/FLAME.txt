@@ -1,0 +1,25 @@
+import machine
+import ssd1306
+from machine import Pin, ADC, I2C
+import time
+
+# Configuración del sensor de llama (pueden variar según el modelo)
+pin_flame_sensor = Pin(32, Pin.IN)  # Asigna el pin donde está conectado el sensor de llama
+adc = ADC(pin_flame_sensor)
+
+# Configuración del display OLED
+i2c = I2C(scl=Pin(5), sda=Pin(4))  # Asigna los pines SCL y SDA para la comunicación I2C
+oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+
+while True:
+    flame_value = adc.read()  # Lee el valor del sensor de llama
+
+    if flame_value > 1000:  # Define un umbral para detectar la llama (puedes ajustarlo según tus necesidades)
+        oled.fill(0)  # Limpia la pantalla
+        oled.text("¡Llama detectada!", 0, 0)  # Imprime el mensaje en el display OLED
+        oled.show()  # Actualiza la pantalla con el mensaje
+    else:
+        oled.fill(0)  # Limpia la pantalla cuando no se detecta llama
+        oled.show()  # Actualiza la pantalla para borrar cualquier mensaje anterior
+    time.sleep(0.1)  # Espera un corto período antes de volver a leer el sensor
+

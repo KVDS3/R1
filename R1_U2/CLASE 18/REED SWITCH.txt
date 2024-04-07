@@ -1,0 +1,41 @@
+from machine import Pin
+import time
+
+# Configurar el pin del reed switch
+reed_pin = Pin(14, Pin.IN)
+
+# Configurar el pin del módulo láser KY-008
+laser_pin = Pin(15, Pin.OUT)
+
+def detectar_inclinacion():
+    return reed_pin.value()
+
+def encender_laser():
+    laser_pin.on()
+    print("Laser encendido")
+
+def apagar_laser():
+    laser_pin.off()
+    print("Laser apagado")
+
+# Estado anterior del reed switch
+estado_anterior = False
+
+# Bucle principal
+while True:
+    # Detectar inclinación
+    inclinacion = detectar_inclinacion()
+    
+    # Si se detecta inclinación y el estado anterior es False
+    if inclinacion and not estado_anterior:
+        encender_laser()
+    # Si no se detecta inclinación y el estado anterior es True
+    elif not inclinacion and estado_anterior:
+        apagar_laser()
+    
+    # Actualizar el estado anterior
+    estado_anterior = inclinacion
+    
+    # Esperar un momento antes de volver a comprobar
+    time.sleep(0.1)
+

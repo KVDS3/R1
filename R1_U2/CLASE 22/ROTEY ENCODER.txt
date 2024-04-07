@@ -1,0 +1,64 @@
+from machine import Pin, I2C
+import time
+import ssd1306
+
+# Configuración de los pines del encoder KY-040
+CLK = Pin(14, Pin.IN)
+DT = Pin(13, Pin.IN)
+
+# Variables para almacenar el estado anterior de los pines
+last_CLK = CLK.value()
+last_DT = DT.value()
+
+# Variable para almacenar la posición del encoder
+posicion = 0
+
+# Variable para almacenar la dirección del movimiento anterior del encoder
+last_direccion = 0
+
+# Configuración de la comunicación I2C para el display OLED
+i2c = I2C(sda=Pin(5), scl=Pin(4))
+oled_width = 128
+oled_height = 64
+oled = ssd1306.SSD1306_I2C(oled_width, oled_height, i2c)
+
+def actualizar_posicion():
+    global last_CLK, last_DT, posicion, last_direccion
+
+    CLK_state = CLK.value()
+    DT_state = DT.value()
+
+    if CLK_state != last_CLK:
+        if DT_state != CLK_state:
+            if last_direccion == 1:
+                last_direccion = 0
+            else:
+                last_direccion = 1
+            posicion += 1
+        else:
+            if last_direccion == -1:
+                last_direccion = 0
+            else:
+                last_direccion = -1
+            posicion -= 1
+
+    last_CLK = CLK_state
+
+def show_message(message):
+    oled.fill(0)
+    oled.text(message, 0, 0)
+    oled.show()
+
+def main():
+    while True:
+        posicion_anterior = posicion  # Guardar la posición anterior
+        actualizar_posicion()
+        
+        if posicion != posicion_anterior:  # Verificar si la posición ha cambiado
+            print("Dirección del encoder:", "Positiva" if last_direccion == 1 else "Negativa" if last_direccion == -1 else "Detenido")
+            print("Posición del encoder:", posicion)
+            show_message("Pos: " + str(posicion))  # Mostrar la posición en el display OLED
+
+if __name__ == "__main__":
+    main()
+

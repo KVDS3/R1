@@ -1,0 +1,55 @@
+from machine import Pin
+import time
+
+# Configuración de los pines de los motores
+motor1_pin1 = Pin(27, Pin.OUT)
+motor1_pin2 = Pin(26, Pin.OUT)
+motor2_pin1 = Pin(14, Pin.OUT)
+motor2_pin2 = Pin(12, Pin.OUT)
+
+# Configuración del pin del sensor de efecto Hall
+hall_sensor_pin = Pin(32, Pin.IN)
+
+# Variable para mantener el estado de activación del segundo motor
+motor2_activado = False
+
+# Función para avanzar ambos motores
+def avanzar():
+    motor1_pin1.value(1)
+    motor1_pin2.value(0)
+    motor2_pin1.value(1)
+    motor2_pin2.value(0)
+
+# Función para detener ambos motores
+def detener():
+    motor1_pin1.value(0)
+    motor1_pin2.value(0)
+    motor2_pin1.value(0)
+    motor2_pin2.value(0)
+
+# Función para verificar si se detecta un campo magnético
+def detectar_campo_magnetico():
+    return hall_sensor_pin.value() == 1
+
+# Función para girar los motores simultáneamente durante 5 segundos si se detecta un campo magnético
+def girar_motores():
+    global motor2_activado  # Usamos la variable global
+
+    if detectar_campo_magnetico() and not motor2_activado:
+        print("Campo magnético detectado: True")
+        avanzar()  # Activar ambos motores
+        motor2_activado = True  # Indicar que el segundo motor ha sido activado
+        time.sleep(5)  # Girar durante 5 segundos
+        detener()  # Detener ambos motores
+    elif not detectar_campo_magnetico():
+        # Si no se detecta un campo magnético, reseteamos el estado del segundo motor
+        motor2_activado = False
+
+# Ejemplo de uso
+try:
+    while True:
+        girar_motores()  # Girar los motores durante 5 segundos si se detecta un campo magnético
+        time.sleep(0.1)  # Esperar un corto período antes de volver a verificar
+except KeyboardInterrupt:
+    detener()  # Detener los motores si se interrumpe el programa
+
